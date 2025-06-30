@@ -10,6 +10,7 @@ export interface Property {
   habitaciones: number;
   banos: number;
   ambientes: number;
+  tipoOperacion: 'venta' | 'alquiler';
   images: string[];
   isActive: boolean;
   createdAt: string;
@@ -27,5 +28,6 @@ export interface CreatePropertyForm {
   habitaciones: number;
   banos: number;
   ambientes: number;
+  tipoOperacion: 'venta' | 'alquiler';
   images?: File[];
 }

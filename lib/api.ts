@@ -63,8 +63,14 @@ export const propertyAPI = {
     return response.data;
   },
 
-  // Filtros (para futuro uso)
-  getWithFilters: async (filters: Record<string, string | number>): Promise<Property[]> => {
+  // Filtros con paginación
+  getWithFilters: async (filters: Record<string, string | number>): Promise<{
+    data: Property[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       params.append(key, value.toString());

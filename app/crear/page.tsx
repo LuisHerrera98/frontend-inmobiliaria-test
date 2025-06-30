@@ -26,6 +26,7 @@ export default function CreatePropertyPage() {
     habitaciones: 1,
     banos: 1,
     ambientes: 1,
+    tipoOperacion: 'alquiler',
     images: [],
   });
 
@@ -183,7 +184,23 @@ export default function CreatePropertyPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Detalles de la Propiedad</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div>
+                <label htmlFor="tipoOperacion" className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de Operación *
+                </label>
+                <CustomSelect
+                  id="tipoOperacion"
+                  name="tipoOperacion"
+                  value={formData.tipoOperacion}
+                  onChange={(value) => handleSelectChange('tipoOperacion', value)}
+                  options={[
+                    { value: 'alquiler', label: 'Alquiler' },
+                    { value: 'venta', label: 'Venta' }
+                  ]}
+                  required
+                />
+              </div>
               <div>
                 <label htmlFor="ambientes" className="block text-sm font-medium text-gray-700 mb-2">
                   Ambientes *
