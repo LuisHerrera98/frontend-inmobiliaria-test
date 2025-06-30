@@ -1,12 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, Plus, User, LogOut } from 'lucide-react';
+import { Home, Plus, User, LogOut, Menu, X } from 'lucide-react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function Header() {
   const { data: session, status } = useSession();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,8 +36,8 @@ export default function Header() {
               href="/crear"
               className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium flex items-center space-x-1 sm:space-x-2 transition-colors text-sm sm:text-base"
             >
-              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Publicar</span>
+              <Plus className="h-4 w-4" />
+              <span>Publicar</span>
             </Link>
             
             {status === 'loading' ? (
@@ -71,8 +74,74 @@ export default function Header() {
                 Iniciar Sesión
               </button>
             )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 text-gray-700 hover:text-orange-500"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-200">
+            <nav className="px-4 py-4 space-y-2">
+              <Link 
+                href="/" 
+                className="block py-2 text-gray-700 hover:text-orange-500 font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Propiedades
+              </Link>
+              <Link 
+                href="/crear" 
+                className="block py-2 text-gray-700 hover:text-orange-500 font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Publicar Propiedad
+              </Link>
+              {session && (
+                <Link 
+                  href="/profile" 
+                  className="block py-2 text-gray-700 hover:text-orange-500 font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Mi Perfil
+                </Link>
+              )}
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <Link 
+                  href="/terminos" 
+                  className="block py-2 text-gray-600 hover:text-orange-500 text-sm"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Términos y Condiciones
+                </Link>
+                <Link 
+                  href="/privacidad" 
+                  className="block py-2 text-gray-600 hover:text-orange-500 text-sm"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Política de Privacidad
+                </Link>
+              </div>
+              {session && (
+                <button
+                  onClick={() => {
+                    signOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2 text-red-600 hover:text-red-700 font-medium"
+                >
+                  Cerrar Sesión
+                </button>
+              )}
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );
