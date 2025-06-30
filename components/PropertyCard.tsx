@@ -103,13 +103,15 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <div className="relative h-48 sm:h-auto sm:w-80 bg-gray-200 flex-shrink-0 group">
           {property.images && property.images.length > 0 ? (
             <>
-              <Image
-                src={property.images[currentImageIndex]}
-                alt={property.titulo}
-                fill
-                className="object-cover"
-                unoptimized
-              />
+              <Link href={`/property/${property._id}`}>
+                <Image
+                  src={property.images[currentImageIndex]}
+                  alt={property.titulo}
+                  fill
+                  className="object-contain cursor-pointer hover:scale-105 transition-transform duration-200"
+                  unoptimized
+                />
+              </Link>
               
               {/* Navigation arrows */}
               {property.images.length > 1 && (

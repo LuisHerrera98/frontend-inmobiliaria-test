@@ -52,7 +52,7 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
             src={images[currentImageIndex]}
             alt={`${title} - Imagen ${currentImageIndex + 1}`}
             fill
-            className="object-cover"
+            className="object-contain"
             unoptimized
           />
           
