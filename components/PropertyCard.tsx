@@ -18,9 +18,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const { data: session } = useSession();
 
-  const API_BASE_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://api-inmobiliaria.alfastoreargentina.link/api/V1'
-    : 'http://localhost:3004/api/V1';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004/api/V1';
 
   const checkIfFavorite = useCallback(async () => {
     try {

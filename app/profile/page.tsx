@@ -15,9 +15,7 @@ export default function ProfilePage() {
   const [favoriteProperties, setFavoriteProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://api-inmobiliaria.alfastoreargentina.link/api/V1'
-    : 'http://localhost:3004/api/V1';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004/api/V1';
 
   const fetchFavoriteProperties = useCallback(async () => {
     try {
