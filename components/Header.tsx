@@ -69,9 +69,10 @@ export default function Header() {
             ) : (
               <button
                 onClick={() => signIn('google')}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium text-sm sm:text-base transition-colors"
+                className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                title="Iniciar sesión"
               >
-                Iniciar Sesión
+                <User className="h-5 w-5 text-gray-600" />
               </button>
             )}
 
@@ -128,7 +129,7 @@ export default function Header() {
                   Política de Privacidad
                 </Link>
               </div>
-              {session && (
+              {session ? (
                 <button
                   onClick={() => {
                     signOut();
@@ -137,6 +138,16 @@ export default function Header() {
                   className="w-full text-left py-2 text-red-600 hover:text-red-700 font-medium"
                 >
                   Cerrar Sesión
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    signIn('google');
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2 text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Iniciar Sesión
                 </button>
               )}
             </nav>
