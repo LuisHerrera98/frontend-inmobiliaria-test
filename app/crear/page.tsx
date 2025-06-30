@@ -187,8 +187,9 @@ export default function CreatePropertyPage() {
         console.error('Error stack:', err.stack);
       }
       if (err && typeof err === 'object' && 'response' in err) {
-        console.error('API Error response:', (err as any).response?.data);
-        console.error('API Error status:', (err as any).response?.status);
+        const apiError = err as { response?: { data?: unknown; status?: number } };
+        console.error('API Error response:', apiError.response?.data);
+        console.error('API Error status:', apiError.response?.status);
       }
       setError('Error al crear la propiedad. Intenta nuevamente.');
     } finally {
