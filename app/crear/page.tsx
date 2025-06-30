@@ -502,7 +502,6 @@ export default function CreatePropertyPage() {
                   name="images"
                   multiple
                   accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/heic,image/heif,image/*"
-                  capture="environment"
                   onChange={handleImageChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
