@@ -81,16 +81,61 @@ export default function CreatePropertyPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    
+    console.log('📸 IMAGE UPLOAD DEBUG - Total files selected:', files.length);
+    
+    files.forEach((file, index) => {
+      console.log(`📸 File ${index + 1}:`, {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        sizeInMB: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+        lastModified: new Date(file.lastModified).toISOString()
+      });
+    });
+    
     if (files.length > 10) {
+      console.error('❌ Too many files:', files.length);
       setError('Máximo 10 imágenes permitidas');
       return;
     }
 
+    // Validar tipos de archivo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
+    const invalidFiles = files.filter(file => !validTypes.includes(file.type) && !file.type.startsWith('image/'));
+    
+    if (invalidFiles.length > 0) {
+      console.error('❌ Invalid file types:', invalidFiles.map(f => ({ name: f.name, type: f.type })));
+      setError(`Tipos de archivo no válidos: ${invalidFiles.map(f => f.name).join(', ')}. Solo se permiten imágenes (JPG, PNG, GIF, WebP, HEIC)`);
+      return;
+    }
+
+    // Validar tamaño (max 10MB por archivo)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const oversizedFiles = files.filter(file => file.size > maxSize);
+    
+    if (oversizedFiles.length > 0) {
+      console.error('❌ Files too large:', oversizedFiles.map(f => ({ name: f.name, size: f.size })));
+      setError(`Archivos muy grandes: ${oversizedFiles.map(f => f.name).join(', ')}. Máximo 10MB por archivo`);
+      return;
+    }
+
+    console.log('✅ All files validated successfully');
     setFormData(prev => ({ ...prev, images: files }));
 
     // Preview images
-    const previews = files.map(file => URL.createObjectURL(file));
-    setPreviewImages(previews);
+    try {
+      const previews = files.map(file => {
+        const url = URL.createObjectURL(file);
+        console.log(`🖼️ Created preview for ${file.name}:`, url);
+        return url;
+      });
+      setPreviewImages(previews);
+      console.log('✅ All previews created successfully');
+    } catch (previewError) {
+      console.error('❌ Error creating previews:', previewError);
+      setError('Error al crear vista previa de imágenes');
+    }
   };
 
   const removeImage = (index: number) => {
@@ -106,6 +151,8 @@ export default function CreatePropertyPage() {
     setLoading(true);
     setError(null);
 
+    console.log('🚀 FORM SUBMIT DEBUG - Starting submission');
+
     try {
       // Convertir strings a números antes de enviar
       const submitData = {
@@ -116,14 +163,34 @@ export default function CreatePropertyPage() {
         ubicacion: formData.ubicacion.toUpperCase(),
       };
       
-      await propertyAPI.create(submitData);
+      console.log('📋 Form data to submit:', {
+        ...submitData,
+        images: submitData.images?.map(img => ({
+          name: img.name,
+          type: img.type,
+          size: img.size
+        }))
+      });
+
+      console.log('📡 Calling API...');
+      const result = await propertyAPI.create(submitData);
+      console.log('✅ API Response:', result);
+      
       setSuccess(true);
       setTimeout(() => {
         router.push('/');
       }, 2000);
     } catch (err) {
+      console.error('❌ SUBMIT ERROR:', err);
+      if (err instanceof Error) {
+        console.error('Error message:', err.message);
+        console.error('Error stack:', err.stack);
+      }
+      if (err && typeof err === 'object' && 'response' in err) {
+        console.error('API Error response:', (err as any).response?.data);
+        console.error('API Error status:', (err as any).response?.status);
+      }
       setError('Error al crear la propiedad. Intenta nuevamente.');
-      console.error('Error creating property:', err);
     } finally {
       setLoading(false);
     }
@@ -433,7 +500,8 @@ export default function CreatePropertyPage() {
                   id="images"
                   name="images"
                   multiple
-                  accept="image/*"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/heic,image/heif,image/*"
+                  capture="environment"
                   onChange={handleImageChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
