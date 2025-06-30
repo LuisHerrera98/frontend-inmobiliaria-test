@@ -53,7 +53,7 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
             alt={`${title} - Imagen ${currentImageIndex + 1}`}
             fill
             className="object-contain"
-            unoptimized
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
           />
           
           {/* Navigation arrows */}
@@ -117,7 +117,7 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
                     alt={`Thumbnail ${index + 1}`}
                     fill
                     className="object-cover"
-                    unoptimized
+                    sizes="80px"
                   />
                 </button>
               ))}
@@ -161,10 +161,10 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
               <Image
                 src={images[currentImageIndex]}
                 alt={`${title} - Imagen ${currentImageIndex + 1}`}
-                width={1200}
-                height={900}
+                width={1600}
+                height={1200}
                 className="max-w-full max-h-full object-contain"
-                unoptimized
+                sizes="100vw"
               />
             </div>
 

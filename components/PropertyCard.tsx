@@ -107,10 +107,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 <Image
                   src={property.images[currentImageIndex]}
                   alt={property.titulo}
-                  width={320}
-                  height={240}
+                  width={640}
+                  height={480}
                   className="w-full h-auto object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
-                  unoptimized
                 />
               </Link>
               
