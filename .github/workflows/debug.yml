@@ -1,0 +1,27 @@
+name: Debug SSH Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Debug Secrets
+      run: |
+        echo "Host exists: ${{ secrets.EC2_HOST != '' }}"
+        echo "Key exists: ${{ secrets.EC2_SSH_KEY != '' }}"
+        echo "Host value: ${{ secrets.EC2_HOST }}"
+        
+    - name: Test SSH Connection
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+          echo "SSH connection successful"
+          whoami
+          pwd
