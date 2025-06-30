@@ -29,15 +29,13 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            {session && (
-              <Link 
-                href="/crear"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium flex items-center space-x-1 sm:space-x-2 transition-colors text-sm sm:text-base"
-              >
-                <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Publicar</span>
-              </Link>
-            )}
+            <Link 
+              href="/crear"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium flex items-center space-x-1 sm:space-x-2 transition-colors text-sm sm:text-base"
+            >
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Publicar</span>
+            </Link>
             
             {status === 'loading' ? (
               <div className="animate-pulse w-8 h-8 bg-gray-200 rounded-full"></div>
