@@ -79,7 +79,50 @@ export default function CreatePropertyPage() {
     setShowUbicacionSuggestions(false);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = (file: File, maxWidth = 1920, quality = 0.8): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calcular nuevas dimensiones manteniendo aspect ratio
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Dibujar imagen redimensionada
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convertir a blob
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            console.log(`📸 Compressed ${file.name}:`, {
+              originalSize: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+              compressedSize: (compressedFile.size / (1024 * 1024)).toFixed(2) + ' MB',
+              reduction: ((1 - compressedFile.size / file.size) * 100).toFixed(1) + '%'
+            });
+            resolve(compressedFile);
+          } else {
+            resolve(file);
+          }
+        }, 'image/jpeg', quality);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
     console.log('📸 IMAGE UPLOAD DEBUG - Total files selected:', files.length);
@@ -110,22 +153,50 @@ export default function CreatePropertyPage() {
       return;
     }
 
-    // Validar tamaño (max 10MB por archivo)
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    const oversizedFiles = files.filter(file => file.size > maxSize);
+    console.log('✅ File types validated successfully');
+
+    // Comprimir imágenes grandes
+    console.log('🔄 Starting image compression...');
+    const processedFiles: File[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      if (file.size > 2 * 1024 * 1024) { // Si es mayor a 2MB, comprimir
+        console.log(`🔄 Compressing large file: ${file.name}`);
+        try {
+          const compressedFile = await compressImage(file);
+          processedFiles.push(compressedFile);
+        } catch (error) {
+          console.error(`❌ Compression failed for ${file.name}:`, error);
+          processedFiles.push(file); // Usar original si falla la compresión
+        }
+      } else {
+        console.log(`✅ File ${file.name} is small enough, no compression needed`);
+        processedFiles.push(file);
+      }
+    }
+
+    // Validar tamaño después de compresión
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const oversizedFiles = processedFiles.filter(file => file.size > maxSize);
     
     if (oversizedFiles.length > 0) {
-      console.error('❌ Files too large:', oversizedFiles.map(f => ({ name: f.name, size: f.size })));
-      setError(`Archivos muy grandes: ${oversizedFiles.map(f => f.name).join(', ')}. Máximo 10MB por archivo`);
+      console.error('❌ Files still too large after compression:', oversizedFiles.map(f => ({ 
+        name: f.name, 
+        size: f.size,
+        sizeInMB: (f.size / (1024 * 1024)).toFixed(2) + ' MB'
+      })));
+      setError(`Archivos muy grandes: ${oversizedFiles.map(f => `${f.name} (${(f.size / (1024 * 1024)).toFixed(1)}MB)`).join(', ')}. Máximo 5MB por archivo`);
       return;
     }
 
-    console.log('✅ All files validated successfully');
-    setFormData(prev => ({ ...prev, images: files }));
+    console.log('✅ All files processed and validated successfully');
+    setFormData(prev => ({ ...prev, images: processedFiles }));
 
     // Preview images
     try {
-      const previews = files.map(file => {
+      const previews = processedFiles.map(file => {
         const url = URL.createObjectURL(file);
         console.log(`🖼️ Created preview for ${file.name}:`, url);
         return url;
