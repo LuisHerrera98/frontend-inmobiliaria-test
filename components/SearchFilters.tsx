@@ -1,8 +1,9 @@
 'use client';
 
 import { MapPin } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CustomSelect from './CustomSelect';
+import { propertyAPI } from '@/lib/api';
 
 interface SearchFiltersProps {
   onFiltersChange?: (filters: FilterParams) => void;
@@ -20,11 +21,43 @@ export interface FilterParams {
 
 export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
   const [filters, setFilters] = useState<FilterParams>({});
+  const [ubicaciones, setUbicaciones] = useState<string[]>([]);
+  const [showUbicacionSuggestions, setShowUbicacionSuggestions] = useState(false);
+  const [filteredUbicaciones, setFilteredUbicaciones] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchUbicaciones = async () => {
+      try {
+        const ubicacionesList = await propertyAPI.getUbicaciones();
+        setUbicaciones(ubicacionesList);
+      } catch (error) {
+        console.error('Error fetching ubicaciones:', error);
+      }
+    };
+    fetchUbicaciones();
+  }, []);
 
   const handleFilterChange = (key: keyof FilterParams, value: string | number | boolean) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFiltersChange?.(newFilters);
+    
+    // Handle ubicacion autocomplete
+    if (key === 'ubicacion') {
+      const stringValue = value as string;
+      const filtered = ubicaciones.filter(ub => 
+        ub.toLowerCase().includes(stringValue.toLowerCase())
+      );
+      setFilteredUbicaciones(filtered);
+      setShowUbicacionSuggestions(stringValue.length > 0 && filtered.length > 0);
+    }
+  };
+
+  const handleUbicacionSelect = (ubicacion: string) => {
+    const newFilters = { ...filters, ubicacion };
+    setFilters(newFilters);
+    onFiltersChange?.(newFilters);
+    setShowUbicacionSuggestions(false);
   };
 
   const clearFilters = () => {
@@ -43,10 +76,32 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
               <input
                 type="text"
                 placeholder="Ubicación (ej: Palermo, CABA)"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-500"
                 value={filters.ubicacion || ''}
                 onChange={(e) => handleFilterChange('ubicacion', e.target.value)}
+                onFocus={() => {
+                  if (filters.ubicacion && filteredUbicaciones.length > 0) {
+                    setShowUbicacionSuggestions(true);
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setShowUbicacionSuggestions(false), 200);
+                }}
               />
+              {showUbicacionSuggestions && (
+                <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                  {filteredUbicaciones.slice(0, 5).map((ubicacion, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleUbicacionSelect(ubicacion)}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-900 border-b border-gray-100 last:border-b-0"
+                    >
+                      {ubicacion}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

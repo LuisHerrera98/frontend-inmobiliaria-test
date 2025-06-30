@@ -3,6 +3,8 @@ export interface Property {
   titulo: string;
   descripcion: string;
   direccion: string;
+  ubicacion: string;
+  requisitos?: string;
   aceptaMascotas: boolean;
   precioARS: number;
   precioUSD: number;
@@ -21,6 +23,8 @@ export interface CreatePropertyForm {
   titulo: string;
   descripcion: string;
   direccion: string;
+  ubicacion: string;
+  requisitos?: string;
   aceptaMascotas: boolean;
   precioARS: number | string;
   precioUSD: number | string;

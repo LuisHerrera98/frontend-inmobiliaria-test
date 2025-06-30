@@ -107,7 +107,7 @@ export default function CustomSelect({
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
       >
-        <span className={selectedOption ? 'text-gray-900' : 'text-gray-400'}>
+        <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown 

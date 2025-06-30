@@ -40,6 +40,9 @@ export const propertyAPI = {
     formData.append('titulo', data.titulo);
     formData.append('descripcion', data.descripcion);
     formData.append('direccion', data.direccion);
+    formData.append('ubicacion', data.ubicacion);
+    if (data.requisitos) formData.append('requisitos', data.requisitos);
+    formData.append('tipoOperacion', data.tipoOperacion);
     formData.append('aceptaMascotas', data.aceptaMascotas.toString());
     formData.append('precioARS', data.precioARS.toString());
     formData.append('precioUSD', data.precioUSD.toString());
@@ -76,6 +79,12 @@ export const propertyAPI = {
       params.append(key, value.toString());
     });
     const response = await api.get(`/properties?${params}`);
+    return response.data;
+  },
+
+  // Obtener ubicaciones para autocomplete
+  getUbicaciones: async (): Promise<string[]> => {
+    const response = await api.get('/properties/ubicaciones/list');
     return response.data;
   },
 };

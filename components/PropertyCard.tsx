@@ -5,7 +5,7 @@ import { Heart, Phone, Mail, Home, ChevronLeft, ChevronRight } from 'lucide-reac
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import axios from 'axios';
 
 interface PropertyCardProps {
@@ -98,18 +98,20 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow mb-4">
-      <div className="flex flex-col sm:flex-row">
+      <div className="flex flex-col sm:flex-row sm:h-56">
         {/* Image Section - Left Side */}
-        <div className="relative sm:w-80 bg-gray-200 flex-shrink-0 group">
+        <div className="relative sm:h-full sm:w-96 bg-gray-200 flex-shrink-0 group overflow-hidden">
           {property.images && property.images.length > 0 ? (
             <>
-              <Link href={`/property/${property._id}`}>
+              <Link href={`/property/${property._id}`} className="block w-full h-full sm:absolute sm:inset-0">
                 <Image
                   src={property.images[currentImageIndex]}
                   alt={property.titulo}
                   width={640}
                   height={480}
-                  className="w-full h-auto object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                  className="w-full h-auto sm:absolute sm:inset-0 sm:w-full sm:h-full sm:object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                  sizes="(max-width: 640px) 100vw, 384px"
+                  priority
                 />
               </Link>
               
@@ -141,24 +143,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 </div>
               )}
 
-              {/* Favorite button - Top Right of Image */}
-              {session && (
-                <div className="absolute top-2 right-2">
-                  <button 
-                    onClick={toggleFavorite}
-                    disabled={favoriteLoading}
-                    className={`p-1 sm:p-1.5 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full shadow-sm transition-colors ${
-                      favoriteLoading ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <Heart 
-                      className={`h-3 w-3 sm:h-4 sm:w-4 transition-colors ${
-                        isFavorite ? 'text-red-500 fill-red-500' : 'text-gray-600'
-                      }`} 
-                    />
-                  </button>
-                </div>
-              )}
 
               {/* Pet friendly badge */}
               {property.aceptaMascotas && (
@@ -166,6 +150,22 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                   Pet Friendly
                 </div>
               )}
+
+              {/* Favorite button - on image for mobile */}
+              <button 
+                onClick={session ? toggleFavorite : () => signIn('google')}
+                disabled={favoriteLoading}
+                className={`sm:hidden absolute top-2 right-2 p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-sm transition-all z-10 ${
+                  favoriteLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                title={session ? 'Agregar a favoritos' : 'Inicia sesión para guardar'}
+              >
+                <Heart 
+                  className={`h-5 w-5 transition-colors ${
+                    isFavorite ? 'text-red-500 fill-red-500' : 'text-gray-600'
+                  }`} 
+                />
+              </button>
             </>
           ) : (
             <div className="flex items-center justify-center h-full">
@@ -175,57 +175,82 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         </div>
 
         {/* Content Section - Right Side */}
-        <div className="flex-1 p-4 sm:p-6 flex flex-col justify-between relative">
-          <div>
-            {/* Title and Location - PRIMERO */}
-            <div className="mb-3">
-              <Link href={`/property/${property._id}`}>
-                <h3 className="font-semibold text-lg sm:text-xl text-gray-900 hover:text-orange-500 cursor-pointer mb-1 sm:mb-2">
-                  {property.titulo}
-                </h3>
-              </Link>
-              <p className="text-sm text-gray-600 font-medium">{property.direccion}</p>
-            </div>
+        <div className="flex-1 p-4 flex flex-col relative">
+          {/* Favorite button - absolute top right only on desktop */}
+          <button 
+            onClick={session ? toggleFavorite : () => signIn('google')}
+            disabled={favoriteLoading}
+            className={`hidden sm:block absolute top-4 right-4 p-1.5 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-10 ${
+              favoriteLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            title={session ? 'Agregar a favoritos' : 'Inicia sesión para guardar'}
+          >
+            <Heart 
+              className={`h-4 w-4 transition-colors ${
+                isFavorite ? 'text-red-500 fill-red-500' : 'text-gray-600'
+              }`} 
+            />
+          </button>
 
-            {/* Price - SEGUNDO (solo si no es $0) */}
+          <div className="flex flex-col justify-between h-full">
+            <div>
+              {/* Title and Location */}
+              <div className="mb-3 pr-6">
+                <Link href={`/property/${property._id}`}>
+                  <h3 className="font-semibold text-base sm:text-lg text-gray-900 hover:text-orange-500 cursor-pointer mb-1">
+                    {property.titulo}
+                  </h3>
+                </Link>
+                <p className="text-sm text-gray-600">{property.direccion}</p>
+              </div>
+
+            {/* Price */}
             {(property.precioUSD > 0 || property.precioARS > 0) && (
-              <div className="mb-4">
+              <div className="mb-3">
                 {property.precioUSD > 0 && (
-                  <div className="text-xl font-bold text-gray-900 mb-1">
+                  <div className="text-lg font-bold text-gray-900">
                     {formatPriceUSD(property.precioUSD)}
                   </div>
                 )}
+                {property.precioARS > 0 && (
+                  <div className="text-lg font-bold text-gray-900">
+                    {formatPrice(property.precioARS)}
+                  </div>
+                )}
                 <div className="text-sm text-gray-600">
-                  {property.precioARS > 0 && `${formatPrice(property.precioARS)} + `}
-                  ${property.expensas.toLocaleString()} Expensas
+                  + ${property.expensas.toLocaleString()} Expensas
                 </div>
               </div>
             )}
 
             {/* Property details */}
-            <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+            <div className="flex items-center space-x-2 sm:space-x-3 text-sm text-gray-600">
               <span>{property.ambientes} amb.</span>
               <span>{property.habitaciones} dorm.</span>
               <span>{property.banos} baño{property.banos > 1 ? 's' : ''}</span>
             </div>
 
-            {/* Description */}
-            <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-3 sm:mb-4 hidden sm:block">
-              {property.descripcion}
-            </p>
-          </div>
+            </div>
 
-          {/* Actions - Bottom Right */}
-          <div className="flex justify-end items-center space-x-2 sm:space-x-3 mt-auto">
-            <button className="p-1.5 sm:p-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-              <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
-            </button>
-            <button className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded font-medium flex items-center space-x-1 sm:space-x-2 transition-colors text-sm sm:text-base">
-              <Mail className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>Contactar</span>
-            </button>
+            {/* Actions - Bottom */}
+            <div className="flex justify-between items-center mt-2">
+              <Link 
+                href={`/property/${property._id}`}
+                className="text-sm text-orange-500 hover:text-orange-600 font-medium"
+              >
+                Ver más detalles
+              </Link>
+              <div className="flex items-center space-x-2">
+                <button className="p-1.5 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+                  <Phone className="h-4 w-4 text-gray-600" />
+                </button>
+                <button className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded font-medium flex items-center space-x-1 transition-colors text-sm">
+                  <Mail className="h-4 w-4" />
+                  <span>Contactar</span>
+                </button>
+              </div>
+            </div>
           </div>
-
         </div>
       </div>
     </div>

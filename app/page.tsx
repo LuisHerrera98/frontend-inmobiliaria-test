@@ -109,13 +109,13 @@ export default function HomePage() {
           </div>
           
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <button className="flex items-center space-x-1 sm:space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm sm:text-base">
+            <button className="flex items-center space-x-1 sm:space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm sm:text-base text-gray-700 hover:text-gray-900">
               <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Ver mapa</span>
               <span className="sm:hidden">Mapa</span>
             </button>
             
-            <select className="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base">
+            <select className="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base text-gray-700">
               <option>Ordenar</option>
               <option>Precio menor a mayor</option>
               <option>Precio mayor a menor</option>

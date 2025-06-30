@@ -51,7 +51,7 @@ export default function Header() {
                       alt={session.user.name || ''}
                       width={32}
                       height={32}
-                      className="rounded-full w-6 h-6 sm:w-8 sm:h-8"
+                      className="rounded-full w-6 h-6 sm:w-8 sm:h-8 object-cover"
                     />
                   ) : (
                     <User className="h-5 w-5 sm:h-6 sm:w-6" />

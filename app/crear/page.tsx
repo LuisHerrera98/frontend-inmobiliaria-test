@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { propertyAPI } from '@/lib/api';
 import { CreatePropertyForm } from '@/types/property';
@@ -14,11 +14,16 @@ export default function CreatePropertyPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [ubicaciones, setUbicaciones] = useState<string[]>([]);
+  const [showUbicacionSuggestions, setShowUbicacionSuggestions] = useState(false);
+  const [filteredUbicaciones, setFilteredUbicaciones] = useState<string[]>([]);
   
   const [formData, setFormData] = useState<CreatePropertyForm>({
     titulo: '',
     descripcion: '',
     direccion: '',
+    ubicacion: '',
+    requisitos: '',
     aceptaMascotas: false,
     precioARS: '',
     precioUSD: '',
@@ -29,6 +34,18 @@ export default function CreatePropertyPage() {
     tipoOperacion: 'alquiler',
     images: [],
   });
+
+  useEffect(() => {
+    const fetchUbicaciones = async () => {
+      try {
+        const ubicacionesList = await propertyAPI.getUbicaciones();
+        setUbicaciones(ubicacionesList);
+      } catch (error) {
+        console.error('Error fetching ubicaciones:', error);
+      }
+    };
+    fetchUbicaciones();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -41,11 +58,25 @@ export default function CreatePropertyPage() {
       setFormData(prev => ({ ...prev, [name]: value }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
+      
+      // Handle ubicacion autocomplete
+      if (name === 'ubicacion') {
+        const filtered = ubicaciones.filter(ub => 
+          ub.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredUbicaciones(filtered);
+        setShowUbicacionSuggestions(value.length > 0 && filtered.length > 0);
+      }
     }
   };
 
   const handleSelectChange = (name: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleUbicacionSelect = (ubicacion: string) => {
+    setFormData(prev => ({ ...prev, ubicacion }));
+    setShowUbicacionSuggestions(false);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +113,7 @@ export default function CreatePropertyPage() {
         precioARS: Number(formData.precioARS),
         precioUSD: formData.precioUSD ? Number(formData.precioUSD) : 0,
         expensas: Number(formData.expensas),
+        ubicacion: formData.ubicacion.toUpperCase(),
       };
       
       await propertyAPI.create(submitData);
@@ -161,7 +193,7 @@ export default function CreatePropertyPage() {
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div>
                 <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                   <MapPin className="h-4 w-4 mr-1" />
                   Dirección *
@@ -174,7 +206,60 @@ export default function CreatePropertyPage() {
                   value={formData.direccion}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-400"
-                  placeholder="Ej: Av. Santa Fe 3456, Palermo, CABA"
+                  placeholder="Ej: Av. Santa Fe 3456"
+                />
+              </div>
+
+              <div className="relative">
+                <label htmlFor="ubicacion" className="block text-sm font-medium text-gray-700 mb-2">
+                  Ubicación *
+                </label>
+                <input
+                  type="text"
+                  id="ubicacion"
+                  name="ubicacion"
+                  required
+                  value={formData.ubicacion}
+                  onChange={handleInputChange}
+                  onFocus={() => {
+                    if (formData.ubicacion && filteredUbicaciones.length > 0) {
+                      setShowUbicacionSuggestions(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowUbicacionSuggestions(false), 200);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-400"
+                  placeholder="Ej: PALERMO, BELGRANO, RECOLETA"
+                />
+                {showUbicacionSuggestions && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    {filteredUbicaciones.slice(0, 5).map((ubicacion, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleUbicacionSelect(ubicacion)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-900 border-b border-gray-100 last:border-b-0"
+                      >
+                        {ubicacion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="md:col-span-2">
+                <label htmlFor="requisitos" className="block text-sm font-medium text-gray-700 mb-2">
+                  Requisitos
+                </label>
+                <textarea
+                  id="requisitos"
+                  name="requisitos"
+                  rows={3}
+                  value={formData.requisitos}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-400"
+                  placeholder="Ej: Recibo de sueldo, garantía propietaria, depósito..."
                 />
               </div>
             </div>
