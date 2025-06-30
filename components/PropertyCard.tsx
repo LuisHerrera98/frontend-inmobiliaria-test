@@ -1,10 +1,10 @@
 'use client';
 
 import { Property } from '@/types/property';
-import { Heart, Phone, Mail, Home, PawPrint, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, Phone, Mail, Home, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
 
@@ -22,20 +22,20 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     ? 'https://api-inmobiliaria.alfastoreargentina.link/api/V1'
     : 'http://localhost:3004/api/V1';
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      checkIfFavorite();
-    }
-  }, [session?.user?.id, property._id]);
-
-  const checkIfFavorite = async () => {
+  const checkIfFavorite = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/users/${session?.user?.id}/favorites`);
       setIsFavorite(response.data.includes(property._id));
     } catch (error) {
       console.error('Error checking favorite:', error);
     }
-  };
+  }, [session?.user?.id, property._id, API_BASE_URL]);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      checkIfFavorite();
+    }
+  }, [session?.user?.id, property._id, checkIfFavorite]);
 
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();

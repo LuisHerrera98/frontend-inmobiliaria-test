@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, MapPin, Home, Bed, DollarSign, Filter } from 'lucide-react';
+import { MapPin, Filter } from 'lucide-react';
 
 export default function SearchFilters() {
   return (

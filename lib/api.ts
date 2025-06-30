@@ -66,8 +66,11 @@ export const propertyAPI = {
   },
 
   // Filtros (para futuro uso)
-  getWithFilters: async (filters: any): Promise<Property[]> => {
-    const params = new URLSearchParams(filters);
+  getWithFilters: async (filters: Record<string, string | number>): Promise<Property[]> => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      params.append(key, value.toString());
+    });
     const response = await api.get(`/properties?${params}`);
     return response.data;
   },

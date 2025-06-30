@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Property } from '@/types/property';
@@ -19,18 +19,7 @@ export default function ProfilePage() {
     ? 'https://api-inmobiliaria.alfastoreargentina.link/api/V1'
     : 'http://localhost:3004/api/V1';
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    
-    if (!session) {
-      router.push('/');
-      return;
-    }
-
-    fetchFavoriteProperties();
-  }, [session, status, router]);
-
-  const fetchFavoriteProperties = async () => {
+  const fetchFavoriteProperties = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -58,7 +47,18 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user?.id, API_BASE_URL]);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session) {
+      router.push('/');
+      return;
+    }
+
+    fetchFavoriteProperties();
+  }, [session, status, router, fetchFavoriteProperties]);
 
   if (status === 'loading' || loading) {
     return (
