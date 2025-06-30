@@ -81,9 +81,15 @@ export default function CreatePropertyPage() {
 
   const compressImage = (file: File, maxWidth = 1920, quality = 0.8): Promise<File> => {
     return new Promise((resolve) => {
+      // Solo ejecutar en cliente
+      if (typeof window === 'undefined') {
+        resolve(file);
+        return;
+      }
+
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const img = new Image();
+      const img = document.createElement('img');
       
       img.onload = () => {
         // Calcular nuevas dimensiones manteniendo aspect ratio
