@@ -70,8 +70,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
   const formatPriceUSD = (price: number) => {
     return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
       minimumFractionDigits: 0,
     }).format(price);
   };
@@ -198,7 +196,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               <div className="mb-3 pr-6">
                 <Link href={`/property/${property._id}`}>
                   <h3 className="font-semibold text-base sm:text-lg text-gray-900 hover:text-orange-500 cursor-pointer mb-1">
-                    {property.titulo}
+                    {property.titulo} - {property.ubicacion?.toUpperCase()}
                   </h3>
                 </Link>
                 <p className="text-sm text-gray-600">{property.direccion}</p>
@@ -207,12 +205,16 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             {/* Price */}
             {(property.precioUSD > 0 || property.precioARS > 0) && (
               <div className="mb-3">
-                {property.precioUSD > 0 && (
-                  <div className="text-lg font-bold text-gray-900">
-                    {formatPriceUSD(property.precioUSD)}
+                {property.precioUSD > 0 ? (
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-lg font-bold text-gray-900">
+                      {formatPriceUSD(property.precioUSD)}
+                    </span>
+                    <span className="text-sm font-medium text-green-600 uppercase">
+                      USD
+                    </span>
                   </div>
-                )}
-                {property.precioARS > 0 && (
+                ) : (
                   <div className="text-lg font-bold text-gray-900">
                     {formatPrice(property.precioARS)}
                   </div>

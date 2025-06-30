@@ -28,8 +28,12 @@ const handler = NextAuth({
 
           if (response.ok) {
             const userData = await response.json();
+            console.log('User data from backend:', userData);
             user.id = userData._id;
+            console.log('Set user.id to:', user.id);
             return true;
+          } else {
+            console.error('Backend response not ok:', response.status, await response.text());
           }
         } catch (error) {
           console.error('Error creating user:', error);

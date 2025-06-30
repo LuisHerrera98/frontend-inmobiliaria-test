@@ -4,20 +4,33 @@ import Link from 'next/link';
 import { Home, Plus, User, LogOut, Menu, X } from 'lucide-react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Header() {
   const { data: session, status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isVerySmallScreen, setIsVerySmallScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsVerySmallScreen(window.innerWidth < 380);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main header row */}
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Home className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500" />
-            <span className="text-lg sm:text-xl font-bold text-gray-900">InmobiliariaApp</span>
+            <Home className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-orange-500" />
+            <span className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-900">InmobiliariaApp</span>
           </Link>
 
           {/* Navigation */}
@@ -30,8 +43,8 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Actions - hidden on very small screens */}
+          <div className={`${isVerySmallScreen ? 'hidden' : 'flex'} items-center space-x-2 sm:space-x-4`}>
             <Link 
               href="/crear"
               className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium flex items-center space-x-1 sm:space-x-2 transition-colors text-sm sm:text-base"
@@ -85,6 +98,66 @@ export default function Header() {
             </button>
           </div>
         </div>
+
+        {/* Bottom row for very small screens */}
+        {isVerySmallScreen && (
+          <div className="flex justify-between items-center py-2 border-t border-gray-100">
+            {/* Publish button - left side */}
+            <Link 
+              href="/crear"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-colors text-sm"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Publicar</span>
+            </Link>
+            
+            {/* User and Menu - right side */}
+            <div className="flex items-center space-x-2">
+              {status === 'loading' ? (
+                <div className="animate-pulse w-8 h-8 bg-gray-200 rounded-full"></div>
+              ) : session ? (
+                <div className="flex items-center space-x-2">
+                  <Link href="/profile" className="flex items-center space-x-2 text-gray-700 hover:text-orange-500">
+                    {session.user.image ? (
+                      <Image
+                        src={session.user.image}
+                        alt={session.user.name || ''}
+                        width={32}
+                        height={32}
+                        className="rounded-full w-6 h-6 sm:w-8 sm:h-8 object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5 sm:h-6 sm:w-6" />
+                    )}
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="p-1.5 sm:p-2 text-gray-400 hover:text-red-500 rounded-full"
+                    title="Cerrar sesión"
+                  >
+                    <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => signIn('google')}
+                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                  title="Iniciar sesión"
+                >
+                  <User className="h-5 w-5 text-gray-600" />
+                </button>
+              )}
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-2 text-gray-700 hover:text-orange-500"
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Menu */}
         {isMenuOpen && (
