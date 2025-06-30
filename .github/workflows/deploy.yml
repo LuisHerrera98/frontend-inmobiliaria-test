@@ -51,7 +51,7 @@ jobs:
           /home/ubuntu/.nvm/versions/node/v22.17.0/bin/npm run build
           
           echo "=== Iniciando con PM2 ==="
-          /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 start /home/ubuntu/.nvm/versions/node/v22.17.0/bin/npm --name frontend-inmobiliaria-test -- start
+          /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 start --name frontend-inmobiliaria-test "npm start"
           
           echo "=== Guardando configuración PM2 ==="
           /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 save
