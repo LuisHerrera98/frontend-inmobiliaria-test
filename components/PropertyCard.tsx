@@ -98,17 +98,18 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow mb-4">
-      <div className="flex flex-col sm:flex-row sm:h-48">
+      <div className="flex flex-col sm:flex-row">
         {/* Image Section - Left Side */}
-        <div className="relative h-48 sm:h-auto sm:w-80 bg-gray-200 flex-shrink-0 group">
+        <div className="relative sm:w-80 bg-gray-200 flex-shrink-0 group">
           {property.images && property.images.length > 0 ? (
             <>
               <Link href={`/property/${property._id}`}>
                 <Image
                   src={property.images[currentImageIndex]}
                   alt={property.titulo}
-                  fill
-                  className="object-contain cursor-pointer hover:scale-105 transition-transform duration-200"
+                  width={320}
+                  height={240}
+                  className="w-full h-auto object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
                   unoptimized
                 />
               </Link>
